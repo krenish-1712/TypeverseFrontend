@@ -1,10 +1,6 @@
 import { useState, useEffect } from "react";
 import {AppBar,Toolbar,IconButton,Typography,Button,Box,Drawer,List,ListItem,ListItemButton,} from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import logo from "../assets/img/t_logo.png";
-import navIcon1 from "../assets/img/nav-icon1.svg";
-import navIcon2 from "../assets/img/nav-icon2.svg";
-import navIcon3 from "../assets/img/nav-icon3.svg";
 import { useNavigate, useLocation } from "react-router-dom";
 
 export const Header = () => {
