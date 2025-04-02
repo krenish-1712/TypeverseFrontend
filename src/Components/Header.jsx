@@ -42,7 +42,7 @@ export const Header = () => {
             py: 2,
           }}
         >
-          <Box component="a" href="/" sx={{ width: "10%" }}>
+          <Box sx={{ width: "9%" }}>
             <h2>Typeverse</h2>
           </Box>
 

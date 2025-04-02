@@ -46,7 +46,7 @@ const SignUp = () => {
       }
     
       try {
-        let res = await axios.post("https://backend-wp0i.onrender.com/authentication/signup", values);
+        let res = await axios.post("https://typeversebackend.onrender.com/authentication/signup", values);
         localStorage.setItem('Token', res.data.token);
         
         toast.success("Sign up successfully!");
