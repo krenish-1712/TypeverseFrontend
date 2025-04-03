@@ -47,7 +47,7 @@ const Login = () => {
       try {
         console.log('hiiiii');
         
-        let res = await axios.post("https://typeversebackend.onrender.com/authentication/login", values);
+        let res = await axios.post("https://typeversebackend-lqac.onrender.com/authentication/login", values);
         localStorage.setItem('Token', res.data.token);
         toast.success("Login successful! Redirecting...");
         

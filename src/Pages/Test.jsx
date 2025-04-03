@@ -88,7 +88,7 @@ const Test = () => {
   const getData = async () => {
     try {
       setloader(true);
-      let res = await axios.get("https://typeversebackend.onrender.com/paragraph/read");
+      let res = await axios.get("https://typeversebackend-lqac.onrender.com/paragraph/read");
       settext(res.data.data);
     } catch (error) {
       console.error("Error fetching data:",error.response?.data || error.message);
