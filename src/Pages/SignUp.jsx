@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { useState, useEffect } from "react";
 import Box from '@mui/material/Box';
 import { Typography } from '@mui/material';
 import TextField from '@mui/material/TextField';
@@ -13,7 +13,8 @@ import image from '../assets/img/dialog.jpg'
 import { styled } from '@mui/material/styles';
 import backimg from '../assets/img/footer-bg.png'
 import svg from '../assets/img/contact-img.svg'
-
+import SyncLoader from "react-spinners/SyncLoader";
+import { CircularProgress } from "@mui/material";
 
 
 const Image = styled(Box)(({ theme }) => ({
@@ -31,6 +32,7 @@ const Image = styled(Box)(({ theme }) => ({
 }));
 
 const SignUp = () => {
+  let [loader,setloader] = useState(false)
   let navigate = useNavigate()
   const formik = useFormik({
     initialValues: {
@@ -46,15 +48,15 @@ const SignUp = () => {
       }
     
       try {
+        setloader(true)
         let res = await axios.post("https://typeversebackend-lqac.onrender.com/authentication/signup", values);
         localStorage.setItem('Token', res.data.token);
-        
         toast.success("Sign up successfully!");
-    
         setTimeout(() => {
           navigate("/login");
         }, 2000);
       } catch (error) {
+        setloader(false)
         toast.error("Signup failed! Please try again.");
         console.error(error);
       }
@@ -217,7 +219,7 @@ const SignUp = () => {
               
             />
           <p className='fs-6 text-white'>Have an account?<button onClick={()=>login()} type='button'  style={{backgroundColor:'transparent', border:'none',color:'skyblue'}}>Log in</button></p>
-        <Button variant="contained" sx={{ width: '400px',background:'linear-gradient(#9d3585,rgb(164, 0, 186))' }} type="submit">Sign up</Button>
+        <Button variant="contained" sx={{ width: '400px',background:'linear-gradient(#9d3585,rgb(164, 0, 186))' }} type="submit">{loader?<CircularProgress size={25} sx={{ color: "#fff" }} />:"Sign Up"}</Button>
         </Box>
       </form>
     </Box>
