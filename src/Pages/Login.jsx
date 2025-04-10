@@ -56,7 +56,7 @@ const Login = () => {
         }, 2000);
       } catch (error) {
         toast.error("User or password is invalid");
-        console.error(error);
+        console.error(error.message);
       }
     },
   });
