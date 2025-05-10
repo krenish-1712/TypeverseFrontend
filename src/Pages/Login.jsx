@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Box from '@mui/material/Box';
 import { Typography } from '@mui/material';
 import TextField from '@mui/material/TextField';
@@ -38,13 +38,23 @@ const Login = () => {
       email: '',
       password: '',
     },
-    onSubmit: async (values) => {
-      // Check if fields are empty BEFORE sending request
-      if (!values.email || !values.password) {
-        toast.warning("Please enter all fields!");
-        return; 
+    validate: (values) => {
+      const errors = {};
+        
+      if (!values.email) {
+        errors.email = "Email is required";
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
+        errors.email = "Invalid email address";
       }
-  
+    
+      if (!values.password) {
+        errors.password = "Password is required";
+      } else if (values.password.length < 6) {
+        errors.password = "Password must be at least 6 characters";
+      }
+      return errors;
+    },  
+    onSubmit: async (values) => {
       try {
         setloader(true)
         let res = await axios.post("https://typeversebackend-lqac.onrender.com/authentication/login", values);
@@ -57,19 +67,17 @@ const Login = () => {
       } catch (error) {
         setloader(false)
         toast.error("User or password is invalid");
-        console.error(error.message);
       }
     },
   });
   
-
   let signup = () =>{
     navigate('/signup')
   }
 
   return (
   
-    <div style={{ width: '100%',height:'100vh',backgroundImage:`url(${backimg})`,backgroundRepeat: "no-repeat",backgroundSize:'cover',gap:'40px'}} class='d-flex align-items-center justify-content-center'>
+    <div style={{ width: '100%',height:'100vh',backgroundImage:`url(${backimg})`,backgroundRepeat: "no-repeat",backgroundSize:'cover',gap:'40px'}} className='d-flex align-items-center justify-content-center'>
         <img src={svg} style={{width:'600px',}} alt="" />
     <Image>
       <Box className='d-flex flex-column align-items-center justify-content-evenly' 
@@ -86,73 +94,135 @@ const Login = () => {
           autoComplete="off"
         >
             <TextField
-              id="outlined-basic"
-              name="email"
-              label="Email"
-              variant="outlined"
-              onChange={formik.handleChange}
-              value={formik.values.email}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-  color: 'white', // Set text color when not focused
-  backgroundColor: 'transparent', // Background color when not focused
-  '& fieldset': {
-    borderColor: 'white', // Border color when not focused
-  },
-  '&:hover fieldset': {
-    borderColor: '#9d3585', // Border color on hover
-  },
-  '&.Mui-focused': {
-    backgroundColor: 'transparent', // Background color when focused
-  },
-  '&.Mui-focused fieldset': {
-    borderColor: '#9d3585', // Border color when focused
-  },
-},
-'& .MuiInputBase-input': {
-  color: 'white', // Input text color when not focused
-  backgroundColor: 'transparent', // Ensure input itself has a transparent background
-},
-'& .MuiInputLabel-root': {
-  color: 'white', // Label color when not focused
-  '&.Mui-focused': {
-    color: '#9d3585', // Label color when focused
-  },
-},paddingBottom:'10px'
-              }}
-            />
-            <TextField
-              id="outlined-basic"
-              label="Password"
-              type='password'
-              name='password'
-              variant="outlined"
-              onChange={formik.handleChange}
-              value={formik.values.password}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  color: 'white', // Set text color when not focused
-                  '& fieldset': {
-                    borderColor: 'white', // Border color when not focused
-                  },
-                  '&:hover fieldset': {
-                    borderColor: '#9d3585', // Border color on hover
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#9d3585', // Border color when focused
-                  },
-                },
-                '& .MuiInputBase-input': {
-                  color: 'white', // Input text color when not focused
-                },
-                '& .MuiInputLabel-root': {
-                  color: 'white', // Label color when not focused
-                  '&.Mui-focused': {
-                    color: '#9d3585', // Label color when focused
-                  },
-                },paddingBottom:'10px'
-              }}
-            />
+                          id="outlined-basic"
+                          type='email'
+                          name="email"
+                          label="Email"
+                          variant="outlined"
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
+                            value={formik.values.email}
+                            error={formik.touched.email && Boolean(formik.errors.email)}
+                            helperText={formik.touched.email && formik.errors.email}
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              color: 'white', // Set text color when not focused
+                              '& fieldset': {
+                                borderColor: 'white', // Border color when not focused
+                              },
+                              '&:hover fieldset': {
+                                borderColor: '#9d3585', // Border color on hover
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: '#9d3585', // Border color when focused
+                              },
+                            },
+                            '& .MuiInputBase-input': {
+                              color: 'white', // Input text color when not focused
+                            },
+                            '& .MuiInputLabel-root': {
+                              color: 'white', // Label color when not focused
+                              '&.Mui-focused': {
+                                color: '#9d3585', // Label color when focused
+                              },
+                            },
+                            "& .MuiOutlinedInput-root": {
+                              color: "white",
+                              // normal state
+                              "& fieldset": {
+                                borderColor: formik.touched.email && formik.errors.email
+                                  ? "red"
+                                  : "white",
+                              },
+                              // hover state
+                              "&:hover fieldset": {
+                                borderColor: formik.touched.email && formik.errors.email
+                                  ? "red"
+                                  : "#9d3585",
+                              },
+                              // focused state
+                              "&.Mui-focused fieldset": {
+                                borderColor: formik.touched.email && formik.errors.email
+                                  ? "red"
+                                  : "#9d3585",
+                              },
+                            },
+                            "& .MuiInputLabel-root": {
+                              color: "white",
+                              "&.Mui-focused": {
+                                color: formik.touched.email && formik.errors.email
+                                  ? "red"
+                                  : "#9d3585",
+                              },
+                            },
+                            paddingBottom:'10px'
+                          }}
+                        />
+                        <TextField
+                          id="outlined-basic"
+                          label="Password"
+                          type='password'
+                          name='password'
+                          variant="outlined"
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
+                          value={formik.values.password}
+                          error={formik.touched.password && Boolean(formik.errors.password)}
+                          helperText={formik.touched.password && formik.errors.password}
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              color: 'white', // Set text color when not focused
+                              '& fieldset': {
+                                borderColor: 'white', // Border color when not focused
+                              },
+                              '&:hover fieldset': {
+                                borderColor: '#9d3585', // Border color on hover
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: '#9d3585', // Border color when focused
+                              },
+                            },
+                            '& .MuiInputBase-input': {
+                              color: 'white', // Input text color when not focused
+                            },
+                            '& .MuiInputLabel-root': {
+                              color: 'white', // Label color when not focused
+                              '&.Mui-focused': {
+                                color: '#9d3585', // Label color when focused
+                              },
+                            },
+                            "& .MuiOutlinedInput-root": {
+                              color: "white",
+                              // normal state
+                              "& fieldset": {
+                                borderColor: formik.touched.password && formik.errors.password
+                                  ? "red"
+                                  : "white",
+                              },
+                              // hover state
+                              "&:hover fieldset": {
+                                borderColor: formik.touched.password && formik.errors.password
+                                  ? "red"
+                                  : "#9d3585",
+                              },
+                              // focused state
+                              "&.Mui-focused fieldset": {
+                                borderColor: formik.touched.password && formik.errors.password
+                                  ? "red"
+                                  : "#9d3585",
+                              },
+                            },
+                            "& .MuiInputLabel-root": {
+                              color: "white",
+                              "&.Mui-focused": {
+                                color: formik.touched.conpasswordact && formik.errors.password
+                                  ? "red"
+                                  : "#9d3585",
+                              },
+                            },
+                            paddingBottom:'10px'
+                          }}
+                        />
              <FormControlLabel
               control={<Checkbox value="remember" color="primary" sx={{color:'white'}} />}
               label="Agree to terms and conditions"

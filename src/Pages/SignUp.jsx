@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Box from '@mui/material/Box';
 import { Typography } from '@mui/material';
 import TextField from '@mui/material/TextField';
@@ -13,7 +13,6 @@ import image from '../assets/img/dialog.jpg'
 import { styled } from '@mui/material/styles';
 import backimg from '../assets/img/footer-bg.png'
 import svg from '../assets/img/contact-img.svg'
-import SyncLoader from "react-spinners/SyncLoader";
 import { CircularProgress } from "@mui/material";
 
 
@@ -34,33 +33,58 @@ const Image = styled(Box)(({ theme }) => ({
 const SignUp = () => {
   let [loader,setloader] = useState(false)
   let navigate = useNavigate()
-  const formik = useFormik({
-    initialValues: {
-      name : '',
-      contact : '',
-      email: '',
-      password: '',
-    },
-    onSubmit: async (values) => {
-      if (!values.email || !values.password || !values.name || !values.contact) {
-        toast.warning("Please fill all the fields!");
-        return;
-      }
-    
-      try {
-        setloader(true)
-        let res = await axios.post("https://typeversebackend-lqac.onrender.com/authentication/signup", values);
-        localStorage.setItem('Token', res.data.token);
-        toast.success("Sign up successfully!");
-        setTimeout(() => {
-          navigate("/login");
-        }, 2000);
-      } catch (error) {
-        setloader(false)
-        toast.error("Signup failed! Please try again.");
-        console.error(error);
-      }
-    }    
+
+const formik = useFormik({
+  initialValues: {
+    name: '',
+    contact: '',
+    email: '',
+    password: '',
+  },
+  validate: (values) => {
+    const errors = {};
+      
+    if (!values.name) {
+      errors.name = "Name is required";
+    } else if (!/^[a-zA-Z\s]+$/.test(values.name)) {
+      errors.name = "Name must only contain letters and spaces";
+    } else if (values.name.length < 2) {
+      errors.name = "Name must be at least 2 characters";
+    }
+  
+    if (!values.contact) {
+      errors.contact = "Contact is required";
+    } else if (!/^[0-9]{10}$/.test(values.contact)) {
+      errors.contact = "Contact must be a 10-digit number";
+    }
+  
+    if (!values.email) {
+      errors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
+      errors.email = "Invalid email address";
+    }
+  
+    if (!values.password) {
+      errors.password = "Password is required";
+    } else if (values.password.length < 6) {
+      errors.password = "Password must be at least 6 characters";
+    }
+    return errors;
+  },  
+  onSubmit: async (values) => {
+    try {
+      setloader(true);
+      const res = await axios.post("https://typeversebackend-lqac.onrender.com/authentication/signup", values);
+      localStorage.setItem('Token', res.data.token);
+      toast.success("Sign up successfully!");
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
+    } catch (error) {
+      setloader(false);
+      toast.error("Signup failed! Please try again.");
+    }
+  }
 });
 
   let login = () =>{
@@ -69,7 +93,7 @@ const SignUp = () => {
 
   return (
   
-    <div style={{ width: '100%',height:'100vh',backgroundImage:`url(${backimg})`,backgroundRepeat: "no-repeat",backgroundSize:'cover',gap:'40px'}} class='d-flex align-items-center justify-content-center'>
+    <div style={{ width: '100%',height:'100vh',backgroundImage:`url(${backimg})`,backgroundRepeat: "no-repeat",backgroundSize:'cover',gap:'40px'}} className='d-flex align-items-center justify-content-center'>
        <img src={svg} style={{width:'600px',}} alt="" />
     <Image>
       <Box className='d-flex flex-column align-items-center justify-content-evenly' 
@@ -91,7 +115,10 @@ const SignUp = () => {
               label="Name"
               variant="outlined"
               onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
               value={formik.values.name}
+              error={formik.touched.name && Boolean(formik.errors.name)}
+              helperText={formik.touched.name && formik.errors.name}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   color: 'white', // Set text color when not focused
@@ -113,7 +140,37 @@ const SignUp = () => {
                   '&.Mui-focused': {
                     color: '#9d3585', // Label color when focused
                   },
-                },paddingBottom:'10px'
+                },
+                "& .MuiOutlinedInput-root": {
+                  color: "white",
+                  // normal state
+                  "& fieldset": {
+                    borderColor: formik.touched.name && formik.errors.name
+                      ? "red"
+                      : "white",
+                  },
+                  // hover state
+                  "&:hover fieldset": {
+                    borderColor: formik.touched.name && formik.errors.name
+                      ? "red"
+                      : "#9d3585",
+                  },
+                  // focused state
+                  "&.Mui-focused fieldset": {
+                    borderColor: formik.touched.name && formik.errors.name
+                      ? "red"
+                      : "#9d3585",
+                  },
+                },
+                "& .MuiInputLabel-root": {
+                  color: "white",
+                  "&.Mui-focused": {
+                    color: formik.touched.name && formik.errors.name
+                      ? "red"
+                      : "#9d3585",
+                  },
+                },
+                paddingBottom:'10px'
               }}
             /> 
            <TextField
@@ -123,9 +180,10 @@ const SignUp = () => {
             label="Contact"
             variant="outlined"
             onChange={formik.handleChange}
-            value={formik.values.contact}
-            error={formik.touched.contact && Boolean(formik.errors.contact)}
-            helperText={formik.touched.contact && formik.errors.contact}
+            onBlur={formik.handleBlur}
+                value={formik.values.contact}
+                error={formik.touched.contact && Boolean(formik.errors.contact)}
+                helperText={formik.touched.contact && formik.errors.contact}
             sx={{
               '& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button': {
                 display: 'none',
@@ -144,6 +202,35 @@ const SignUp = () => {
                 color: 'white',
                 '&.Mui-focused': { color: '#9d3585' },
               },
+              "& .MuiOutlinedInput-root": {
+                color: "white",
+                // normal state
+                "& fieldset": {
+                  borderColor: formik.touched.contact && formik.errors.contact
+                    ? "red"
+                    : "white",
+                },
+                // hover state
+                "&:hover fieldset": {
+                  borderColor: formik.touched.contact && formik.errors.contact
+                    ? "red"
+                    : "#9d3585",
+                },
+                // focused state
+                "&.Mui-focused fieldset": {
+                  borderColor: formik.touched.contact && formik.errors.contact
+                    ? "red"
+                    : "#9d3585",
+                },
+              },
+              "& .MuiInputLabel-root": {
+                color: "white",
+                "&.Mui-focused": {
+                  color: formik.touched.contact && formik.errors.contact
+                    ? "red"
+                    : "#9d3585",
+                },
+              },
               paddingBottom: '10px',
             }}
           />
@@ -155,7 +242,10 @@ const SignUp = () => {
               label="Email"
               variant="outlined"
               onChange={formik.handleChange}
-              value={formik.values.email}
+              onBlur={formik.handleBlur}
+                value={formik.values.email}
+                error={formik.touched.email && Boolean(formik.errors.email)}
+                helperText={formik.touched.email && formik.errors.email}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   color: 'white', // Set text color when not focused
@@ -177,7 +267,37 @@ const SignUp = () => {
                   '&.Mui-focused': {
                     color: '#9d3585', // Label color when focused
                   },
-                },paddingBottom:'10px'
+                },
+                "& .MuiOutlinedInput-root": {
+                  color: "white",
+                  // normal state
+                  "& fieldset": {
+                    borderColor: formik.touched.email && formik.errors.email
+                      ? "red"
+                      : "white",
+                  },
+                  // hover state
+                  "&:hover fieldset": {
+                    borderColor: formik.touched.email && formik.errors.email
+                      ? "red"
+                      : "#9d3585",
+                  },
+                  // focused state
+                  "&.Mui-focused fieldset": {
+                    borderColor: formik.touched.email && formik.errors.email
+                      ? "red"
+                      : "#9d3585",
+                  },
+                },
+                "& .MuiInputLabel-root": {
+                  color: "white",
+                  "&.Mui-focused": {
+                    color: formik.touched.email && formik.errors.email
+                      ? "red"
+                      : "#9d3585",
+                  },
+                },
+                paddingBottom:'10px'
               }}
             />
             <TextField
@@ -187,7 +307,10 @@ const SignUp = () => {
               name='password'
               variant="outlined"
               onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
               value={formik.values.password}
+              error={formik.touched.password && Boolean(formik.errors.password)}
+              helperText={formik.touched.password && formik.errors.password}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   color: 'white', // Set text color when not focused
@@ -209,7 +332,37 @@ const SignUp = () => {
                   '&.Mui-focused': {
                     color: '#9d3585', // Label color when focused
                   },
-                },paddingBottom:'10px'
+                },
+                "& .MuiOutlinedInput-root": {
+                  color: "white",
+                  // normal state
+                  "& fieldset": {
+                    borderColor: formik.touched.password && formik.errors.password
+                      ? "red"
+                      : "white",
+                  },
+                  // hover state
+                  "&:hover fieldset": {
+                    borderColor: formik.touched.password && formik.errors.password
+                      ? "red"
+                      : "#9d3585",
+                  },
+                  // focused state
+                  "&.Mui-focused fieldset": {
+                    borderColor: formik.touched.password && formik.errors.password
+                      ? "red"
+                      : "#9d3585",
+                  },
+                },
+                "& .MuiInputLabel-root": {
+                  color: "white",
+                  "&.Mui-focused": {
+                    color: formik.touched.conpasswordact && formik.errors.password
+                      ? "red"
+                      : "#9d3585",
+                  },
+                },
+                paddingBottom:'10px'
               }}
             />
              <FormControlLabel
